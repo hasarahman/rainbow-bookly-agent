@@ -595,6 +595,155 @@
           }
         ]
       }
+    },
+    {
+      "eval_case_id": "compound_request_ungated_and_gated_in_one_message",
+      "agent_data": {
+        "agents": {
+          "rainbow": {
+            "agent_id": "rainbow",
+            "agent_type": "SingleAgent",
+            "instruction": "Bookly customer support agent."
+          }
+        },
+        "turns": [
+          {
+            "turn_index": 0,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "I'd like some help, my email is sarah.chen@example.com"
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "name": "send_auth_code",
+                        "args": {
+                          "email": "sarah.chen@example.com"
+                        }
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "tool",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "name": "send_auth_code",
+                        "response": {
+                          "result": "A 6-digit verification code was sent to sarah.chen@example.com. Ask the customer for it."
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "I've sent a 6-digit verification code to your email. Could you share that code with me?"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          {
+            "turn_index": 1,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "123456"
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "name": "verify_auth_code",
+                        "args": {
+                          "email": "sarah.chen@example.com",
+                          "code": "123456"
+                        }
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "tool",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "name": "verify_auth_code",
+                        "response": {
+                          "result": "Verification succeeded. The customer's identity is confirmed."
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "You're verified! What would you like to do?"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          {
+            "turn_index": 2,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "What's your return policy, and can you also check on order BK-10001?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              }
+            ]
+          }
+        ]
+      }
     }
   ]
 }
