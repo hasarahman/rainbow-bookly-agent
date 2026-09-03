@@ -1,6 +1,6 @@
-# Rainbow — Bookly Customer Support Agent
+# Rainbow — Bookly Customer Experience Agent
 
-Rainbow is an AI customer support agent for **Bookly**, a fictional online bookstore. It's built
+Rainbow is an AI customer experience agent for **Bookly**, a fictional online bookstore. It's built
 with Google's [ADK](https://adk.dev) (Agent Development Kit) via `agents-cli`, and handles three
 use cases: order status inquiries, return/refund requests, and general questions (shipping,
 policies, password reset).
