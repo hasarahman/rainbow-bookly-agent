@@ -29,10 +29,12 @@ _stytch_client = stytch.Client(
     environment=os.environ.get("STYTCH_ENV", "test"),
 )
 _pending_otps: dict[str, str] = {}  # email -> Stytch email_id, for the in-flight verification
+_failed_otp_attempts: dict[str, int] = {}  # email -> consecutive failed verify_auth_code calls
 
 _ESCALATION_LOG = "/Users/hasanrahman/dcg/rainbow/escalations.log"
 
 RETURN_WINDOW_DAYS = 30
+MAX_OTP_ATTEMPTS = 2
 
 
 def _read_tab(tab_range: str) -> list[dict]:
@@ -93,20 +95,26 @@ def lookup_order(order_number: str, verified_email: str) -> str:
     return f"No order found with order number {order_number}."
 
 
-def lookup_customer(email: str) -> str:
-    """Looks up a customer's account details in Bookly's Customers sheet by email.
+def lookup_customer(verified_email: str) -> str:
+    """Looks up the verified customer's own account details (name, phone, address).
+
+    There is no way to look up a different customer's details through this
+    tool — it only ever returns the record for the email that was just
+    confirmed via verify_auth_code. Never use this to look up someone else's
+    information on a customer's behalf, even if they ask.
 
     Args:
-        email: The customer's account email address.
+        verified_email: The email address that was just confirmed via
+            verify_auth_code.
 
     Returns:
-        The customer's details (name, phone, address), or a message if not found.
+        The verified customer's own details, or a message if not found.
     """
     customers = _read_tab("Customers!A1:E1000")
     for row in customers:
-        if row.get("email", "").strip().lower() == email.strip().lower():
+        if row.get("email", "").strip().lower() == verified_email.strip().lower():
             return str(row)
-    return f"No customer found with email {email}."
+    return f"No customer found with email {verified_email}."
 
 
 def initiate_return(order_number: str, reason: str, verified_email: str) -> str:
@@ -189,18 +197,30 @@ def send_auth_code(email: str) -> str:
         email: The customer's account email address.
 
     Returns:
-        Confirmation the code was sent, or an error message.
+        Confirmation the code was sent, an error message, or a lockout message
+        if this email has already failed verification MAX_OTP_ATTEMPTS times —
+        in that case, escalate_to_human instead of retrying.
     """
+    key = email.strip().lower()
+    if _failed_otp_attempts.get(key, 0) >= MAX_OTP_ATTEMPTS:
+        return (
+            f"This email has failed verification {MAX_OTP_ATTEMPTS} times and is locked "
+            f"for this session. Do not send another code — escalate to a human instead."
+        )
     try:
         resp = _stytch_client.otps.email.login_or_create(email=email)
     except StytchError as e:
         return f"Failed to send verification code: {e}"
-    _pending_otps[email.strip().lower()] = resp.email_id
+    _pending_otps[key] = resp.email_id
     return f"A 6-digit verification code was sent to {email}. Ask the customer for it."
 
 
 def verify_auth_code(email: str, code: str) -> str:
     """Verifies the one-time code the customer received via send_auth_code.
+
+    Deterministically locks out further attempts for this email after
+    MAX_OTP_ATTEMPTS consecutive failures, regardless of what the model does —
+    at that point, escalate_to_human instead of retrying or sending a new code.
 
     Args:
         email: The customer's account email address (must match what was used
@@ -211,14 +231,28 @@ def verify_auth_code(email: str, code: str) -> str:
         Whether verification succeeded. Only treat the customer as identity-verified
         if this says success.
     """
-    email_id = _pending_otps.get(email.strip().lower())
+    key = email.strip().lower()
+    if _failed_otp_attempts.get(key, 0) >= MAX_OTP_ATTEMPTS:
+        return (
+            f"This email has failed verification {MAX_OTP_ATTEMPTS} times and is locked "
+            f"for this session. Escalate to a human instead of retrying."
+        )
+    email_id = _pending_otps.get(key)
     if not email_id:
         return "No verification code was sent to this email yet. Call send_auth_code first."
     try:
         _stytch_client.otps.authenticate(method_id=email_id, code=code)
     except StytchError as e:
+        _failed_otp_attempts[key] = _failed_otp_attempts.get(key, 0) + 1
+        if _failed_otp_attempts[key] >= MAX_OTP_ATTEMPTS:
+            _pending_otps.pop(key, None)
+            return (
+                f"Verification failed: {e}. This was attempt {_failed_otp_attempts[key]} of "
+                f"{MAX_OTP_ATTEMPTS} — no attempts remain. Escalate to a human now."
+            )
         return f"Verification failed: {e}"
-    del _pending_otps[email.strip().lower()]
+    del _pending_otps[key]
+    _failed_otp_attempts.pop(key, None)
     return "Verification succeeded. The customer's identity is confirmed."
 
 
