@@ -1,0 +1,600 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "order_status_after_verification",
+      "agent_data": {
+        "agents": {
+          "rainbow": {
+            "agent_id": "rainbow",
+            "agent_type": "SingleAgent",
+            "instruction": "Bookly customer support agent."
+          }
+        },
+        "turns": [
+          {
+            "turn_index": 0,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "I'd like some help, my email is sarah.chen@example.com"
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "name": "send_auth_code",
+                        "args": {
+                          "email": "sarah.chen@example.com"
+                        }
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "tool",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "name": "send_auth_code",
+                        "response": {
+                          "result": "A 6-digit verification code was sent to sarah.chen@example.com. Ask the customer for it."
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "I've sent a 6-digit verification code to your email. Could you share that code with me?"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          {
+            "turn_index": 1,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "123456"
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "name": "verify_auth_code",
+                        "args": {
+                          "email": "sarah.chen@example.com",
+                          "code": "123456"
+                        }
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "tool",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "name": "verify_auth_code",
+                        "response": {
+                          "result": "Verification succeeded. The customer's identity is confirmed."
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "You're verified! What would you like to do?"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          {
+            "turn_index": 2,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "What's the status of order BK-10001?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "ownership_guardrail_denies_other_customers_order",
+      "agent_data": {
+        "agents": {
+          "rainbow": {
+            "agent_id": "rainbow",
+            "agent_type": "SingleAgent",
+            "instruction": "Bookly customer support agent."
+          }
+        },
+        "turns": [
+          {
+            "turn_index": 0,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "I'd like some help, my email is carlos.mendez@example.com"
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "name": "send_auth_code",
+                        "args": {
+                          "email": "carlos.mendez@example.com"
+                        }
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "tool",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "name": "send_auth_code",
+                        "response": {
+                          "result": "A 6-digit verification code was sent to carlos.mendez@example.com. Ask the customer for it."
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "I've sent a 6-digit verification code to your email. Could you share that code with me?"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          {
+            "turn_index": 1,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "123456"
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "name": "verify_auth_code",
+                        "args": {
+                          "email": "carlos.mendez@example.com",
+                          "code": "123456"
+                        }
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "tool",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "name": "verify_auth_code",
+                        "response": {
+                          "result": "Verification succeeded. The customer's identity is confirmed."
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "You're verified! What would you like to do?"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          {
+            "turn_index": 2,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "What's the status of order BK-10001?"
+                    }
+                  ],
+                  "role": "user"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "return_window_guardrail_denies_33_day_old_order",
+      "agent_data": {
+        "agents": {
+          "rainbow": {
+            "agent_id": "rainbow",
+            "agent_type": "SingleAgent",
+            "instruction": "Bookly customer support agent."
+          }
+        },
+        "turns": [
+          {
+            "turn_index": 0,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "I'd like some help, my email is james.wilson@example.com"
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "name": "send_auth_code",
+                        "args": {
+                          "email": "james.wilson@example.com"
+                        }
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "tool",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "name": "send_auth_code",
+                        "response": {
+                          "result": "A 6-digit verification code was sent to james.wilson@example.com. Ask the customer for it."
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "I've sent a 6-digit verification code to your email. Could you share that code with me?"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          {
+            "turn_index": 1,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "123456"
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "name": "verify_auth_code",
+                        "args": {
+                          "email": "james.wilson@example.com",
+                          "code": "123456"
+                        }
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "tool",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "name": "verify_auth_code",
+                        "response": {
+                          "result": "Verification succeeded. The customer's identity is confirmed."
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "You're verified! What would you like to do?"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          {
+            "turn_index": 2,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "I want to return order BK-10006, I don't like the book."
+                    }
+                  ],
+                  "role": "user"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "delivered_but_not_received_escalates_immediately",
+      "agent_data": {
+        "agents": {
+          "rainbow": {
+            "agent_id": "rainbow",
+            "agent_type": "SingleAgent",
+            "instruction": "Bookly customer support agent."
+          }
+        },
+        "turns": [
+          {
+            "turn_index": 0,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "I'd like some help, my email is sarah.chen@example.com"
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "name": "send_auth_code",
+                        "args": {
+                          "email": "sarah.chen@example.com"
+                        }
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "tool",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "name": "send_auth_code",
+                        "response": {
+                          "result": "A 6-digit verification code was sent to sarah.chen@example.com. Ask the customer for it."
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "I've sent a 6-digit verification code to your email. Could you share that code with me?"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          {
+            "turn_index": 1,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "123456"
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "name": "verify_auth_code",
+                        "args": {
+                          "email": "sarah.chen@example.com",
+                          "code": "123456"
+                        }
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "tool",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "name": "verify_auth_code",
+                        "response": {
+                          "result": "Verification succeeded. The customer's identity is confirmed."
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "You're verified! What would you like to do?"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          {
+            "turn_index": 2,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "My order BK-10001 says Delivered but I never received it, it's not here."
+                    }
+                  ],
+                  "role": "user"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
