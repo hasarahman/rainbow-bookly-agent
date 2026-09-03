@@ -187,6 +187,58 @@ def initiate_return(order_number: str, reason: str, verified_email: str) -> str:
     )
 
 
+def cancel_order(order_number: str, verified_email: str) -> str:
+    """Cancels an order before it ships, if it hasn't shipped yet.
+
+    Deterministically checks: the order belongs to the verified customer, and
+    its shipping_status is still "Processing" (not yet shipped). Once an order
+    has shipped, it can no longer be cancelled — the customer needs a return
+    instead (use initiate_return).
+
+    Args:
+        order_number: The order number, e.g. "BK-10001".
+        verified_email: The email address that was just confirmed via
+            verify_auth_code.
+
+    Returns:
+        Confirmation the order was cancelled, or an explanation of why it can't be.
+    """
+    orders = _read_tab("Orders!A1:K1000")
+    row_index, order_row = None, None
+    for i, row in enumerate(orders):
+        if row.get("order_number", "").strip().lower() == order_number.strip().lower():
+            row_index, order_row = i + 2, row
+            break
+
+    if order_row is None:
+        return f"No order found with order number {order_number}."
+    if order_row.get("customer_email", "").strip().lower() != verified_email.strip().lower():
+        return (
+            f"Order {order_number} does not belong to the verified account "
+            f"({verified_email}). Access denied."
+        )
+    status = order_row.get("shipping_status", "").strip()
+    if status == "Cancelled":
+        return f"Order {order_number} ({order_row.get('book_ordered')}) is already cancelled."
+    if status != "Processing":
+        return (
+            f"Order {order_number} ({order_row.get('book_ordered')}) has already shipped "
+            f"(status: {status}) and can no longer be cancelled. Use initiate_return instead "
+            f"if the customer wants to send it back."
+        )
+
+    _sheets.update(
+        spreadsheetId=_SPREADSHEET_ID,
+        range=f"Orders!C{row_index}",
+        valueInputOption="RAW",
+        body={"values": [["Cancelled"]]},
+    ).execute()
+    return (
+        f"Order {order_number} ({order_row.get('book_ordered')}) has been cancelled. No charge "
+        f"will be made and nothing will ship."
+    )
+
+
 def send_auth_code(email: str) -> str:
     """Sends a one-time verification code to the customer's email via Stytch.
 

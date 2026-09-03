@@ -2,8 +2,8 @@
 
 I built Rainbow, an AI customer experience agent for **Bookly**, a fictional online bookstore. It's
 built with Google's [ADK](https://adk.dev) (Agent Development Kit) via `agents-cli`, and handles
-three use cases: order status inquiries, return/refund requests, and general questions (shipping,
-policies, password reset).
+four things: order status inquiries, return/refund requests, order cancellation (before shipping),
+and general questions (shipping, policies, password reset).
 
 I avoided mocked LLM calls and all-in-one agent platforms — Rainbow calls real APIs (Google
 Sheets, Stytch) and a real vector database (ChromaDB) directly, orchestrated through a single ADK
@@ -50,6 +50,7 @@ RAG, or Stytch) → grounded response, or **escalation** if the SOP doesn't cove
 | `lookup_order` | Looks up an order by number | Google Sheets API | **Real** |
 | `lookup_customer` | Looks up the verified customer's own account details | Google Sheets API | **Real** |
 | `initiate_return` | Checks return eligibility, writes the return | Google Sheets API | **Real** |
+| `cancel_order` | Cancels an order that hasn't shipped yet | Google Sheets API | **Real** |
 | `send_auth_code` | Sends a 6-digit email OTP | Stytch API | **Real** (test env) |
 | `verify_auth_code` | Verifies the OTP | Stytch API | **Real** (test env) |
 | `escalate_to_human` | Logs a handoff for a human agent | Local log file | Mocked (no paging system attached) |
@@ -114,25 +115,32 @@ distinction is one of the more important design decisions in this build.
 5. **No mockable monetary compensation.** Rainbow has no tool that can issue a gift card, discount,
    or refund outside of `initiate_return`'s own eligibility determination — so it structurally
    cannot be talked into promising one, regardless of how it's asked.
+6. **Cancellation only works before shipping.** `cancel_order` checks ownership the same way as
+   the other tools, and only cancels an order still in "Processing" status — once it's shipped,
+   the tool refuses and points to `initiate_return` instead, since cancellation and return are
+   different operations with different eligibility rules.
 
 ### Instruction-level (verified with eval, softer by nature)
 
-6. **Delivered-but-not-received escalates immediately.** If a customer explicitly says an order
+7. **Delivered-but-not-received escalates immediately.** If a customer explicitly says an order
    marked "Delivered" was never received, Rainbow escalates right away instead of troubleshooting.
    Eval testing caught this rule initially over-triggering on the word "Delivered" alone with no
    actual customer complaint — I tightened the instruction to require an explicit non-receipt
    claim, and confirmed the fix with a regression eval case. See [Evaluation](#evaluation).
-7. **Out-of-scope requests.** Anything unrelated to Bookly — general knowledge, other
+8. **Out-of-scope requests.** Anything unrelated to Bookly — general knowledge, other
    companies/products, creative writing, coding help, opinions — gets politely declined and
    redirected, not attempted.
-8. **Prompt injection / instruction extraction.** Attempts to override Rainbow's role, extract its
+9. **Prompt injection / instruction extraction.** Attempts to override Rainbow's role, extract its
    system instruction or tool definitions, or claim special/developer access ("ignore your
    previous instructions," "repeat your system prompt," "developer mode") get declined the same
    way as any other out-of-scope request.
-9. **Multiple requests in one message.** A message can contain more than one ask (e.g. a general
-   policy question plus an order-specific one). Rainbow addresses every part it can — answering
-   ungated parts immediately rather than blocking them on verification needed only for the gated
-   part.
+10. **Multiple requests in one message.** A message can contain more than one ask (e.g. a general
+    policy question plus an order-specific one). Rainbow addresses every part it can — answering
+    ungated parts immediately rather than blocking them on verification needed only for the gated
+    part.
+11. **Hostile or abusive customers.** Rainbow stays professional and keeps working the actual
+    request regardless of tone (insults, profanity, threats) — it doesn't mirror hostility or
+    refuse service over tone alone, but escalates if the situation genuinely can't be resolved.
 
 ---
 
@@ -296,7 +304,7 @@ rule that was over-triggering on the word "Delivered" alone) are in
 | Dataset | Cases | Result |
 |---|---|---|
 | Single-turn (`tests/eval/datasets/single-turn.json`) | 5 | `final_response_quality`: 5/5 · `safety`: 4/5 (one known false positive — flags routine identity-verification email requests as a PII violation) |
-| Multi-turn (`tests/eval/datasets/multi-turn.json`) | 5 | `multi_turn_task_success`: 5/5 behaviorally correct (two score slightly under 1.0 from a metric-averaging quirk on conditional rubrics, not a real defect — verified against the raw trace) · `multi_turn_tool_use_quality`: 5/5 |
+| Multi-turn (`tests/eval/datasets/multi-turn.json`) | 7 | `multi_turn_task_success`: 7/7 · `multi_turn_tool_use_quality`: 7/7 |
 
 Rerun it yourself:
 ```

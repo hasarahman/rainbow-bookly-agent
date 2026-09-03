@@ -744,6 +744,304 @@
           }
         ]
       }
+    },
+    {
+      "eval_case_id": "cancel_order_already_shipped_denied",
+      "agent_data": {
+        "agents": {
+          "rainbow": {
+            "agent_id": "rainbow",
+            "agent_type": "SingleAgent",
+            "instruction": "Bookly customer support agent."
+          }
+        },
+        "turns": [
+          {
+            "turn_index": 0,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "I'd like some help, my email is sarah.chen@example.com"
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "name": "send_auth_code",
+                        "args": {
+                          "email": "sarah.chen@example.com"
+                        }
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "tool",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "name": "send_auth_code",
+                        "response": {
+                          "result": "A 6-digit verification code was sent to sarah.chen@example.com. Ask the customer for it."
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "I've sent a 6-digit verification code to your email. Could you share that code with me?"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          {
+            "turn_index": 1,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "123456"
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "name": "verify_auth_code",
+                        "args": {
+                          "email": "sarah.chen@example.com",
+                          "code": "123456"
+                        }
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "tool",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "name": "verify_auth_code",
+                        "response": {
+                          "result": "Verification succeeded. The customer's identity is confirmed."
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "You're verified! What would you like to do?"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          {
+            "turn_index": 2,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "I want to cancel my order BK-10001."
+                    }
+                  ],
+                  "role": "user"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "cancel_order_processing_status_succeeds",
+      "agent_data": {
+        "agents": {
+          "rainbow": {
+            "agent_id": "rainbow",
+            "agent_type": "SingleAgent",
+            "instruction": "Bookly customer support agent."
+          }
+        },
+        "turns": [
+          {
+            "turn_index": 0,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "I'd like some help, my email is priya.patel@example.com"
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "name": "send_auth_code",
+                        "args": {
+                          "email": "priya.patel@example.com"
+                        }
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "tool",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "name": "send_auth_code",
+                        "response": {
+                          "result": "A 6-digit verification code was sent to priya.patel@example.com. Ask the customer for it."
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "I've sent a 6-digit verification code to your email. Could you share that code with me?"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          {
+            "turn_index": 1,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "123456"
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "name": "verify_auth_code",
+                        "args": {
+                          "email": "priya.patel@example.com",
+                          "code": "123456"
+                        }
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "tool",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "name": "verify_auth_code",
+                        "response": {
+                          "result": "Verification succeeded. The customer's identity is confirmed."
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "rainbow",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "You're verified! What would you like to do?"
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          },
+          {
+            "turn_index": 2,
+            "events": [
+              {
+                "author": "user",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "I want to cancel order BK-10015 before it ships."
+                    }
+                  ],
+                  "role": "user"
+                }
+              }
+            ]
+          }
+        ]
+      }
     }
   ]
 }
